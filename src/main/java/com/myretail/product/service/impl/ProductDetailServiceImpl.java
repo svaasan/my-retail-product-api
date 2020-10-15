@@ -66,6 +66,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         if(productDetail != null){
             productDetailResponse = new ProductDetailResponse();
             productDetailResponse.setId(id);
+            productDetailResponse.setCreated(created);
             try {
              productDetailResponse.setProductPrice(objectMapper.readValue(productDetail.getCurrentPrice(), ProductPrice.class));
             } catch (JsonProcessingException e) {
@@ -89,7 +90,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             logger.info("Product not found in redsky, id={}", id);
         }
 
-        productDetailResponse.setCreated(created);
+
         return productDetailResponse;
     }
 }
