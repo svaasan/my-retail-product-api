@@ -50,4 +50,24 @@ public class MyRetailApplicationTests {
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void updateProductDetailHappyPath() throws Exception {
+        mvc.perform(MockMvcRequestBuilders
+                .put("/v1/products/13860428")
+                .content("{\"id\":13860428,\"name\":\"The Big Lebowski (Blu-ray)\",\"current_price\":{\"value\":24.49,\"currency_code\":\"USD\"}}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void updateProductDetailInvalidData() throws Exception {
+        mvc.perform(MockMvcRequestBuilders
+                .put("/v1/products/13860427")
+                .content("{\"id\":13860428,\"current_price\":{\"value\":24.49,\"currency_code\":\"USD\"}}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 }

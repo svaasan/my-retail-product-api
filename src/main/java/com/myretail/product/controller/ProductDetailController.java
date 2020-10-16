@@ -18,6 +18,7 @@ public class ProductDetailController {
 
     @Autowired
     ProductDetailService productDetailService;
+
     /**
      * This GET endpoint will serve product detail for given id.
      *
@@ -35,7 +36,8 @@ public class ProductDetailController {
      * @return ProductDetailResponse for given id.
      */
     @GetMapping(path = "/products/{id}", produces = "application/json")
-    ProductDetailResponse getProductDetails(@PathVariable Integer id, HttpServletResponse response) {
+    ProductDetailResponse getProductDetails(@PathVariable Integer id,
+                                            HttpServletResponse response) throws Exception {
         log.info("Incoming get request, id={}", id);
 
         ProductDetailResponse productDetailResponse = productDetailService.getProductDetail(id);
@@ -58,24 +60,25 @@ public class ProductDetailController {
      *    </ul>
      * </p>
      *
-     * @param id                    is a product id for which the product details has to be updated.
-     * @param productDetailRequest  is the request body which has to be updated.
-     * @param response              is used to send http status codes based on data retrieval operation status.
+     * @param id                   is a product id for which the product details has to be updated.
+     * @param productDetailRequest is the request body which has to be updated.
+     * @param response             is used to send http status codes based on data retrieval operation status.
      * @return
      */
     @PutMapping(path = "/products/{id}", consumes = "application/json")
     ProductDetailResponse putProductDetails(@PathVariable Integer id,
-                                    @Valid @RequestBody ProductDetailRequest productDetailRequest,
-                                    HttpServletResponse response) throws Exception{
+                                            @Valid @RequestBody ProductDetailRequest productDetailRequest,
+                                            HttpServletResponse response) throws Exception {
         log.info("Incoming put request, id={}", id);
 
-        if(productDetailRequest == null || productDetailRequest.getId() != id) {
+        if (productDetailRequest == null || productDetailRequest.getId() != id) {
+            log.info("Invalid data, id={}", id);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return null;
         }
         ProductDetailResponse productDetailResponse = productDetailService.updateProductDetail(id, productDetailRequest);
-        if(productDetailResponse != null) {
-            if(productDetailResponse.isCreated()) {
+        if (productDetailResponse != null) {
+            if (productDetailResponse.isCreated()) {
                 response.setStatus(HttpServletResponse.SC_CREATED);
             } else {
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -83,6 +86,7 @@ public class ProductDetailController {
         } else {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+        log.info("Updated product detail for id={}", id);
         return productDetailResponse;
     }
 }

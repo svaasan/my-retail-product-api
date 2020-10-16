@@ -5,8 +5,6 @@ import com.myretail.product.config.RedskyClient
 import com.myretail.product.dao.ProductDetailRepository
 import com.myretail.product.domain.*
 import com.myretail.product.service.impl.ProductDetailServiceImpl
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import spock.lang.Specification
 
 class ProductDetailServiceSpec extends Specification {
@@ -176,6 +174,45 @@ class ProductDetailServiceSpec extends Specification {
         then:
         1 * objectMapper.writeValueAsString(productPrice) >>  { throw new Exception("some exception") }
         1 * productDetailRepository.findById(1234) >>  Optional.empty()
+        0 * _
+
+        thrown Exception
+    }
+
+    def "construct product details - Happy path"() {
+        given:
+        ProductPrice productPrice = new ProductPrice()
+        productPrice.value = 4.99
+        productPrice.currencyCode = "USD"
+        ProductDetail productDetail = new ProductDetail(id: 1234, currentPrice: "{\"value\":4.99,\"currency_code\":\"USD\"}")
+        Product product = new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc")))
+
+        when:
+        ProductDetailResponse actual = productDetailService.constructProductDetailResponse(1234, productDetail, product, false)
+
+        then:
+        1 * objectMapper.readValue("{\"value\":4.99,\"currency_code\":\"USD\"}", ProductPrice.class) >> productPrice
+        0 * _
+
+        actual.id == 1234
+        actual.name == "Sample item Desc"
+        actual.productPrice.value == 4.99
+        actual.productPrice.currencyCode == "USD"
+    }
+
+    def "construct product details - Exception scenario"() {
+        given:
+        ProductPrice productPrice = new ProductPrice()
+        productPrice.value = 4.99
+        productPrice.currencyCode = "USD"
+        ProductDetail productDetail = new ProductDetail(id: 1234, currentPrice: "{\"value\":4.99,\"currency_code\":\"USD\"}")
+        Product product = new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc")))
+
+        when:
+        ProductDetailResponse actual = productDetailService.constructProductDetailResponse(1234, productDetail, product, false)
+
+        then:
+        1 * objectMapper.readValue("{\"value\":4.99,\"currency_code\":\"USD\"}", ProductPrice.class) >> { throw new Exception("some exception") }
         0 * _
 
         thrown Exception

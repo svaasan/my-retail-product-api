@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class ProductDetailRequest {
     private int id;
-    private String name;
     private ProductPrice productPrice;
 
     @JsonGetter("id")
@@ -18,18 +17,7 @@ public class ProductDetailRequest {
         this.id = id;
     }
 
-    @JsonGetter("name")
-    public String getName() {
-        return name;
-    }
-
-    @JsonSetter("name")
-    public void setName(String name) {
-
-        this.name = name;
-    }
-
-    @JsonGetter("current_price")
+   @JsonGetter("current_price")
     public ProductPrice getProductPrice() {
 
         return productPrice;

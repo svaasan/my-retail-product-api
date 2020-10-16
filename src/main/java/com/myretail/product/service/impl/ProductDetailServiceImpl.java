@@ -9,8 +9,6 @@ import com.myretail.product.service.ProductDetailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,7 +31,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
      * @return ProductDetailResponse
      */
     @Override
-    public ProductDetailResponse getProductDetail(Integer id) {
+    public ProductDetailResponse getProductDetail(Integer id) throws Exception{
 
         logger.info("Retrieving product details for {} ", id);
         Product product = redskyClient.getProductById(id);
@@ -45,6 +43,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     @Override
     public ProductDetailResponse updateProductDetail(Integer id, ProductDetailRequest productDetailRequest) throws Exception {
         logger.info("Saving the product details for {}", id);
+
         ProductDetailResponse productDetailResponse = null;
         boolean created = false;
         if(productDetailRepository.findById(id).orElse(null) == null){
@@ -53,14 +52,21 @@ public class ProductDetailServiceImpl implements ProductDetailService {
 
         ProductDetail productDetail = new ProductDetail();
         productDetail.setId(productDetailRequest.getId());
-        productDetail.setCurrentPrice(objectMapper.writeValueAsString(productDetailRequest.getProductPrice()));
+        try {
+            productDetail.setCurrentPrice(objectMapper.writeValueAsString(productDetailRequest.getProductPrice()));
+        } catch (JsonProcessingException ex) {
+            logger.error("Error  parsing the current_price", ex);
+            throw new Exception("Error  parsing the current_price");
+        }
+
 
         ProductDetail savedProductDetail = productDetailRepository.save(productDetail);
 
         return constructProductDetailResponse(id, savedProductDetail, null, created);
     }
 
-    private ProductDetailResponse constructProductDetailResponse(Integer id, ProductDetail productDetail, Product product, boolean created) {
+    private ProductDetailResponse constructProductDetailResponse(Integer id, ProductDetail productDetail, Product product, boolean created) throws Exception{
+        logger.info("constructing the ProductDetailResponse for {}", id);
         ProductDetailResponse productDetailResponse = null;
 
         if(productDetail != null){
@@ -69,8 +75,9 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             productDetailResponse.setCreated(created);
             try {
              productDetailResponse.setProductPrice(objectMapper.readValue(productDetail.getCurrentPrice(), ProductPrice.class));
-            } catch (JsonProcessingException e) {
-                logger.error("Error Occurred during parsing", e);
+            } catch (JsonProcessingException ex) {
+                logger.error("Error  parsing the current_price", ex);
+                throw new Exception("Error  parsing the current_price");
             }
         } else {
             logger.info("Price information not found, id={}", id);
@@ -81,10 +88,8 @@ public class ProductDetailServiceImpl implements ProductDetailService {
                 productDetailResponse = new ProductDetailResponse();
                 productDetailResponse.setId(id);
             }
-            try{
+            if(product.getItem() != null && product.getItem().getProductDescription() != null) {
                 productDetailResponse.setName(product.getItem().getProductDescription().getTitle());
-            } catch (NullPointerException ex){
-                logger.warn("Product endpoint does not have name, id={}", id);
             }
         }else {
             logger.info("Product not found in redsky, id={}", id);
