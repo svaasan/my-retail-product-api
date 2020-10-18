@@ -2,6 +2,7 @@ package com.myretail.product.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -19,6 +20,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Component
 @EnableSwagger2
+@Profile({"!prod"})
 public class SwaggerConfig {
 
     @Value("${application.version}")

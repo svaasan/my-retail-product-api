@@ -1,10 +1,7 @@
 package com.myretail.product.domain;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import java.util.Objects;
 
 /**
  * This domain represents the final response of product detail.
@@ -16,8 +13,6 @@ public class ProductDetailResponse {
     private int id;
     private String name;
     private ProductPrice productPrice;
-    @JsonIgnore
-    private boolean created;
 
     @JsonGetter("id")
     public int getId() {
@@ -51,13 +46,4 @@ public class ProductDetailResponse {
 
         this.productPrice = productPrice;
     }
-
-    public boolean isCreated() {
-        return created;
-    }
-
-    public void setCreated(boolean created) {
-        this.created = created;
-    }
-
 }

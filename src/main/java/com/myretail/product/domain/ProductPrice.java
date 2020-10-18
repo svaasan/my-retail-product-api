@@ -3,15 +3,20 @@ package com.myretail.product.domain;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+/**
+ * This class represents the price of a product.
+ *
+ * @author Shrinivaasan Venkataramani
+ */
 public class ProductPrice {
-    private double value;
+    private Double value;
     private String currencyCode;
 
-    public double getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 

@@ -8,10 +8,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
-import javax.validation.ValidationException;
 
 /**
  * This class will handle exceptions thrown in various part of the application.
@@ -26,7 +23,7 @@ public class MyRetailExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<String> handleValidationException(MethodArgumentNotValidException exception) {
         log.error("Invalid request parameters", exception);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid product detail");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

@@ -35,7 +35,7 @@ git clone https://github.com/svaasan/my-retail-product-api.git
 cd my-retail-product-api
 cd docker
 docker-compose build
-docker-compose up -d
+docker-compose up
 ```
 
 

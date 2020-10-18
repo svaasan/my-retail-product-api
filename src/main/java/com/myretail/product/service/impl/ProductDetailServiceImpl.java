@@ -9,7 +9,10 @@ import com.myretail.product.service.ProductDetailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ProductDetailServiceImpl implements ProductDetailService {
@@ -23,7 +26,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     private RedskyClient redskyClient;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     /**
      * This method will retrieve data from database and redsky rest service and make ProductDetailResponse.
@@ -34,10 +37,15 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     public ProductDetailResponse getProductDetail(Integer id) throws Exception{
 
         logger.info("Retrieving product details for {} ", id);
-        Product product = redskyClient.getProductById(id);
-        ProductDetail productDetail = productDetailRepository.findById(id).orElse(null);
+        Product product = null;
 
-        return constructProductDetailResponse(id, productDetail, product, false);
+        CompletableFuture<ResponseEntity<Product>> futureResponse = redskyClient.getProductById(id);
+        ProductDetail productDetail = productDetailRepository.findById(id).orElse(null);
+        ResponseEntity<Product> responseEntity = futureResponse.get();
+        if (responseEntity != null && responseEntity.hasBody()) {
+            product = responseEntity.getBody();
+        }
+        return constructProductDetailResponse(id, productDetail, product);
     }
 
     @Override
@@ -45,11 +53,6 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         logger.info("Saving the product details for {}", id);
 
         ProductDetailResponse productDetailResponse = null;
-        boolean created = false;
-        if(productDetailRepository.findById(id).orElse(null) == null){
-            created = true;
-        }
-
         ProductDetail productDetail = new ProductDetail();
         productDetail.setId(productDetailRequest.getId());
         try {
@@ -58,21 +61,18 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             logger.error("Error  parsing the current_price", ex);
             throw new Exception("Error  parsing the current_price");
         }
-
-
         ProductDetail savedProductDetail = productDetailRepository.save(productDetail);
 
-        return constructProductDetailResponse(id, savedProductDetail, null, created);
+        return constructProductDetailResponse(id, savedProductDetail, null);
     }
 
-    private ProductDetailResponse constructProductDetailResponse(Integer id, ProductDetail productDetail, Product product, boolean created) throws Exception{
+    private ProductDetailResponse constructProductDetailResponse(Integer id, ProductDetail productDetail, Product product) throws Exception {
         logger.info("constructing the ProductDetailResponse for {}", id);
         ProductDetailResponse productDetailResponse = null;
 
-        if(productDetail != null){
+        if(productDetail != null) {
             productDetailResponse = new ProductDetailResponse();
             productDetailResponse.setId(id);
-            productDetailResponse.setCreated(created);
             try {
              productDetailResponse.setProductPrice(objectMapper.readValue(productDetail.getCurrentPrice(), ProductPrice.class));
             } catch (JsonProcessingException ex) {
@@ -83,19 +83,17 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             logger.info("Price information not found, id={}", id);
         }
 
-        if(product != null){
-            if(productDetailResponse == null){
+        if(product != null) {
+            if(productDetailResponse == null) {
                 productDetailResponse = new ProductDetailResponse();
                 productDetailResponse.setId(id);
             }
             if(product.getItem() != null && product.getItem().getProductDescription() != null) {
                 productDetailResponse.setName(product.getItem().getProductDescription().getTitle());
             }
-        }else {
+        } else {
             logger.info("Product not found in redsky, id={}", id);
         }
-
-
         return productDetailResponse;
     }
 }

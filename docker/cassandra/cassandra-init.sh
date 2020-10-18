@@ -2,7 +2,6 @@
 
 CQL="CREATE KEYSPACE IF NOT EXISTS my_retail WITH REPLICATION = { 'class' : 'org.apache.cassandra.locator.SimpleStrategy','replication_factor': '1'};
 
-DROP TABLE my_retail.product_detail;
 CREATE TABLE IF NOT EXISTS my_retail.product_detail  (
     id        int,
     current_price text,

@@ -40,13 +40,13 @@ class ProductDetailControllerSpec extends Specification {
         0 * _
     }
 
-    def "Valid put request - update existing product"(){
+    def "Valid put request - update product"(){
         given:
         ProductPrice productPrice = new ProductPrice()
         productPrice.value = 9.49
         productPrice.currencyCode = "USD"
         ProductDetailRequest productDetailRequest = new ProductDetailRequest(id: 1234, productPrice: productPrice)
-        ProductDetailResponse expected = new ProductDetailResponse(id: 1234, productPrice: productPrice, created: false)
+        ProductDetailResponse expected = new ProductDetailResponse(id: 1234, productPrice: productPrice)
 
         when:
         ProductDetailResponse actual = productDetailController.putProductDetails(1234,productDetailRequest, httpServletResponse)
@@ -54,24 +54,6 @@ class ProductDetailControllerSpec extends Specification {
         then:
         1 * productDetailService.updateProductDetail(1234, productDetailRequest) >> expected
         1 * httpServletResponse.setStatus(HttpServletResponse.SC_OK)
-        0 * _
-        actual == expected
-    }
-
-    def "Valid put request - add new product"(){
-        given:
-        ProductPrice productPrice = new ProductPrice()
-        productPrice.value = 9.49
-        productPrice.currencyCode = "USD"
-        ProductDetailRequest productDetailRequest = new ProductDetailRequest(id: 1234, productPrice: productPrice)
-        ProductDetailResponse expected = new ProductDetailResponse(id: 1234, productPrice: productPrice, created: true)
-
-        when:
-        ProductDetailResponse actual = productDetailController.putProductDetails(1234, productDetailRequest, httpServletResponse)
-
-        then:
-        1 * productDetailService.updateProductDetail(1234, productDetailRequest) >> expected
-        1 * httpServletResponse.setStatus(HttpServletResponse.SC_CREATED)
         0 * _
         actual == expected
     }
