@@ -39,11 +39,11 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         logger.info("Retrieving product details for {} ", id);
         Product product = null;
 
-        CompletableFuture<ResponseEntity<Product>> futureResponse = redskyClient.getProductById(id);
+        CompletableFuture<ResponseEntity<RedskyProductResponse>> futureResponse = redskyClient.getProductById(id);
         ProductDetail productDetail = productDetailRepository.findById(id).orElse(null);
-        ResponseEntity<Product> responseEntity = futureResponse.get();
+        ResponseEntity<RedskyProductResponse> responseEntity = futureResponse.get();
         if (responseEntity != null && responseEntity.hasBody()) {
-            product = responseEntity.getBody();
+            product = responseEntity.getBody().getProduct();
         }
         return constructProductDetailResponse(id, productDetail, product);
     }

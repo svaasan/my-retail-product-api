@@ -1,6 +1,7 @@
 package com.myretail.product.config;
 
 import com.myretail.product.domain.Product;
+import com.myretail.product.domain.RedskyProductResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +39,16 @@ public class RedskyClient {
      * in product service.
      */
     @Async
-    public CompletableFuture<ResponseEntity<Product>> getProductById(Integer id) {
+    public CompletableFuture<ResponseEntity<RedskyProductResponse>> getProductById(Integer id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<Product> entity = new HttpEntity<>(headers);
-        ResponseEntity<Product> responseEntity = null;
+        ResponseEntity<RedskyProductResponse> responseEntity = null;
 
         String url = String.format(host + endpoint, id);
         long startTime = System.currentTimeMillis();
         try {
-            responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Product.class);
+            responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, RedskyProductResponse.class);
 
         } catch (HttpClientErrorException ex) {
             log.error("Product service returned client error,id={}, status={}", id, ex.getStatusCode());

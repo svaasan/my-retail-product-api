@@ -30,14 +30,14 @@ class ProductDetailServiceSpec extends Specification {
         productPrice.value = 9.49
         productPrice.currencyCode = "USD"
         ProductDetail productDetail = new ProductDetail(id: 1234, currentPrice: "{\"value\":9.49,\"currency_code\":\"USD\"}")
-        Product product = new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc")))
+        RedskyProductResponse redskyProductResponse = new RedskyProductResponse(product: new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc"))))
 
         when:
         ProductDetailResponse result = productDetailService.getProductDetail(1234)
 
         then:
         1 * productDetailRepository.findById(1234) >> new Optional<ProductDetail>(productDetail)
-        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(product, HttpStatus.OK))
+        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(redskyProductResponse, HttpStatus.OK))
         1 * objectMapper.readValue("{\"value\":9.49,\"currency_code\":\"USD\"}", ProductPrice.class) >> productPrice
         0 * _
 
@@ -49,14 +49,14 @@ class ProductDetailServiceSpec extends Specification {
 
     def "Product price not available in database"() {
         given:
-        Product product= new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc")))
+        RedskyProductResponse redskyProductResponse = new RedskyProductResponse(product: new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc"))))
 
         when:
         ProductDetailResponse result = productDetailService.getProductDetail(1234)
 
         then:
         1 * productDetailRepository.findById(1234) >> new Optional<ProductDetail>()
-        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(product, HttpStatus.OK))
+        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(redskyProductResponse, HttpStatus.OK))
         0 * _
 
         result.id == 1234
@@ -77,7 +77,7 @@ class ProductDetailServiceSpec extends Specification {
 
         then:
         1 * productDetailRepository.findById(1234) >> new Optional<ProductDetail>(productDetail)
-        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(null, HttpStatus.NOT_FOUND))
+        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<RedskyProductResponse>(null, HttpStatus.NOT_FOUND))
         1 * objectMapper.readValue("{\"value\":9.49,\"currency_code\":\"USD\"}", ProductPrice.class) >> productPrice
         0 * _
 
@@ -89,13 +89,13 @@ class ProductDetailServiceSpec extends Specification {
 
     def "getProductDetail - exception scenario"() {
         given:
-        Product product= new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc")))
+        RedskyProductResponse redskyProductResponse = new RedskyProductResponse(product: new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc"))))
 
         when:
         productDetailService.getProductDetail(1234)
 
         then:
-        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(product, HttpStatus.OK))
+        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<RedskyProductResponse>(redskyProductResponse, HttpStatus.OK))
         1 * productDetailRepository.findById(1234) >> { throw new Exception("some exception") }
         0 * _
 
@@ -109,14 +109,14 @@ class ProductDetailServiceSpec extends Specification {
         productPrice.value = 9.49
         productPrice.currencyCode = "USD"
         ProductDetail productDetail = new ProductDetail(id: 1234, currentPrice: "{\"value\":9.49,\"currency_code\":\"USD\"}")
-        Product product= new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc")))
+        RedskyProductResponse redskyProductResponse = new RedskyProductResponse(product: new Product(item: new Item(productDescription: new ProductDescription(title: "Sample item Desc"))))
 
         when:
         ProductDetailResponse result = productDetailService.getProductDetail(1234)
 
         then:
         1 * productDetailRepository.findById(1234) >> new Optional<ProductDetail>(productDetail)
-        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<Product>(product, HttpStatus.OK))
+        1 * redskyClient.getProductById(1234) >> new CompletableFuture<ResponseEntity<Product>>().completedFuture(new ResponseEntity<RedskyProductResponse>(redskyProductResponse, HttpStatus.OK))
         1 * objectMapper.readValue("{\"value\":9.49,\"currency_code\":\"USD\"}", ProductPrice.class) >>  { throw new Exception("some exception") }
         0 * _
 
